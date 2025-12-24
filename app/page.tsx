@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import ProjectCard from '@/components/ProjectCard'
+import Navigation from '@/components/Navigation'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,9 +37,9 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-white dark:bg-black">
-      <div className="container mx-auto px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mb-16 text-center">
-          <div className="flex justify-center mb-8">
+      <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-12 text-center">
+          <div className="flex justify-center mb-3">
             <img
               src="/dp2.png"
               alt="Display Picture"
@@ -48,9 +49,10 @@ export default async function Home() {
           <h1 className="text-5xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
             Kongclaves' Portfolio
           </h1>
-          <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">
+          <p className="mt-4 text-lg leading-8 text-gray-600 dark:text-gray-400">
             A collection of vibecoded projects
           </p>
+          <Navigation />
         </div>
 
         {projects.length === 0 ? (
