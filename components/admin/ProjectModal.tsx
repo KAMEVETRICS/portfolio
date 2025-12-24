@@ -225,7 +225,7 @@ export default function ProjectModal({ project, categories = [], onClose }: Proj
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               />
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Note: File uploads on Vercel use placeholder images. For production, use a cloud storage service (S3, Cloudinary, etc.)
+                Images are automatically optimized and uploaded to Cloudinary
               </p>
             </div>
 
