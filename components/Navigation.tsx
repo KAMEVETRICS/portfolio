@@ -12,15 +12,15 @@ export default function Navigation() {
   ]
 
   return (
-    <nav className="mb-8">
-      <div className="flex justify-center gap-6">
+    <nav className="mb-6 sm:mb-8">
+      <div className="flex justify-center gap-4 sm:gap-6">
         {navItems.map((item) => {
           const isActive = pathname === item.href
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`text-lg font-medium transition-colors ${
+              className={`text-base sm:text-lg font-medium transition-colors ${
                 isActive
                   ? 'text-gray-900 dark:text-white border-b-2 border-gray-900 dark:border-white pb-1'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'

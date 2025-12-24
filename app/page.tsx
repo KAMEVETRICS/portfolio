@@ -37,19 +37,19 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-white dark:bg-black">
-      <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-12 text-center">
-          <div className="flex justify-center mb-3">
+      <div className="container mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <div className="mb-8 sm:mb-12 text-center">
+          <div className="flex justify-center mb-2 sm:mb-3">
             <img
               src="/dp2.png"
               alt="Display Picture"
-              className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full object-cover border-4 border-gray-200 dark:border-gray-700 shadow-lg"
+              className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 rounded-full object-cover border-4 border-gray-200 dark:border-gray-700 shadow-lg"
             />
           </div>
-          <h1 className="text-5xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-white">
             Kongclaves' Portfolio
           </h1>
-          <p className="mt-4 text-lg leading-8 text-gray-600 dark:text-gray-400">
+          <p className="mt-2 sm:mt-4 text-base sm:text-lg leading-7 sm:leading-8 text-gray-600 dark:text-gray-400 px-2">
             A collection of vibecoded projects
           </p>
           <Navigation />
@@ -62,13 +62,13 @@ export default async function Home() {
             </p>
           </div>
         ) : (
-          <div className="space-y-16">
+          <div className="space-y-10 sm:space-y-16">
             {/* Projects organized by folders */}
             {Object.values(projectsByCategory).map(({ category, projects: categoryProjects }) => (
-              <div key={category.id} className="space-y-6">
-                <div className="flex items-center gap-3">
+              <div key={category.id} className="space-y-4 sm:space-y-6">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <svg
-                    className="w-6 h-6 text-purple-600 dark:text-purple-400"
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600 dark:text-purple-400 flex-shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -81,17 +81,17 @@ export default async function Home() {
                     />
                   </svg>
                   <div>
-                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                       {category.name}
                     </h2>
                     {category.description && (
-                      <p className="text-gray-600 dark:text-gray-400 mt-1">
+                      <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-0.5 sm:mt-1">
                         {category.description}
                       </p>
                     )}
                   </div>
                 </div>
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {categoryProjects.map((project) => (
                     <ProjectCard key={project.id} project={project} />
                   ))}
@@ -101,10 +101,10 @@ export default async function Home() {
 
             {/* Uncategorized projects */}
             {uncategorizedProjects.length > 0 && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <svg
-                    className="w-6 h-6 text-gray-600 dark:text-gray-400"
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 dark:text-gray-400 flex-shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -116,11 +116,11 @@ export default async function Home() {
                       d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
                     />
                   </svg>
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                     Other Projects
                   </h2>
                 </div>
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {uncategorizedProjects.map((project) => (
                     <ProjectCard key={project.id} project={project} />
                   ))}
