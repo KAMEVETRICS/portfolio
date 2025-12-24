@@ -20,19 +20,36 @@ export async function createProject(formData: FormData) {
   let thumbnailUrl = ''
 
   if (thumbnail && thumbnail.size > 0) {
-    const bytes = await thumbnail.arrayBuffer()
-    const buffer = Buffer.from(bytes)
+    try {
+      const bytes = await thumbnail.arrayBuffer()
+      const buffer = Buffer.from(bytes)
 
-    const uploadsDir = join(process.cwd(), 'public', 'uploads')
-    if (!existsSync(uploadsDir)) {
-      mkdirSync(uploadsDir, { recursive: true })
+      // Check if we're on Vercel (read-only filesystem)
+      const isVercel = process.env.VERCEL === '1'
+      
+      if (isVercel) {
+        // On Vercel, we can't write files. Use a placeholder or skip.
+        // For now, we'll use a placeholder image URL
+        thumbnailUrl = 'https://via.placeholder.com/800x450?text=Image+Upload+Not+Available+on+Vercel'
+        console.warn('File uploads not supported on Vercel. Using placeholder image.')
+      } else {
+        // Local development - write to filesystem
+        const uploadsDir = join(process.cwd(), 'public', 'uploads')
+        if (!existsSync(uploadsDir)) {
+          mkdirSync(uploadsDir, { recursive: true })
+        }
+
+        const filename = `${Date.now()}-${thumbnail.name.replace(/\s/g, '-')}`
+        const filepath = join(uploadsDir, filename)
+
+        await writeFile(filepath, buffer)
+        thumbnailUrl = `/uploads/${filename}`
+      }
+    } catch (error) {
+      console.error('Error uploading thumbnail:', error)
+      // Continue without thumbnail - use placeholder
+      thumbnailUrl = 'https://via.placeholder.com/800x450?text=Upload+Failed'
     }
-
-    const filename = `${Date.now()}-${thumbnail.name.replace(/\s/g, '-')}`
-    const filepath = join(uploadsDir, filename)
-
-    await writeFile(filepath, buffer)
-    thumbnailUrl = `/uploads/${filename}`
   }
 
   const categoryId = formData.get('categoryId') as string | null
@@ -43,7 +60,7 @@ export async function createProject(formData: FormData) {
         title,
         description,
         projectUrl,
-        thumbnailUrl: thumbnailUrl || 'https://via.placeholder.com/800x450?text=No+Image',
+        thumbnailUrl: thumbnailUrl || 'https://via.placeholder.com/800x450?text=No+Image&bg=6366f1&color=fff',
         published,
         categoryId: categoryId || null,
       },
@@ -81,19 +98,34 @@ export async function updateProject(formData: FormData) {
   let thumbnailUrl = existingProject.thumbnailUrl
 
   if (thumbnail && thumbnail.size > 0) {
-    const bytes = await thumbnail.arrayBuffer()
-    const buffer = Buffer.from(bytes)
+    try {
+      const bytes = await thumbnail.arrayBuffer()
+      const buffer = Buffer.from(bytes)
 
-    const uploadsDir = join(process.cwd(), 'public', 'uploads')
-    if (!existsSync(uploadsDir)) {
-      mkdirSync(uploadsDir, { recursive: true })
+      // Check if we're on Vercel (read-only filesystem)
+      const isVercel = process.env.VERCEL === '1'
+      
+      if (isVercel) {
+        // On Vercel, we can't write files. Keep existing thumbnail or use placeholder.
+        console.warn('File uploads not supported on Vercel. Keeping existing thumbnail.')
+        // Keep existing thumbnailUrl
+      } else {
+        // Local development - write to filesystem
+        const uploadsDir = join(process.cwd(), 'public', 'uploads')
+        if (!existsSync(uploadsDir)) {
+          mkdirSync(uploadsDir, { recursive: true })
+        }
+
+        const filename = `${Date.now()}-${thumbnail.name.replace(/\s/g, '-')}`
+        const filepath = join(uploadsDir, filename)
+
+        await writeFile(filepath, buffer)
+        thumbnailUrl = `/uploads/${filename}`
+      }
+    } catch (error) {
+      console.error('Error uploading thumbnail:', error)
+      // Keep existing thumbnail on error
     }
-
-    const filename = `${Date.now()}-${thumbnail.name.replace(/\s/g, '-')}`
-    const filepath = join(uploadsDir, filename)
-
-    await writeFile(filepath, buffer)
-    thumbnailUrl = `/uploads/${filename}`
   }
 
   const categoryId = formData.get('categoryId') as string | null

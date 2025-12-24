@@ -54,26 +54,38 @@ export default function ProjectModal({ project, categories = [], onClose }: Proj
     setError('')
     setLoading(true)
 
-    const form = e.currentTarget
-    const formDataObj = new FormData(form)
+    try {
+      const form = e.currentTarget
+      const formDataObj = new FormData(form)
 
-    // Set published value as string
-    formDataObj.set('published', formData.published ? 'true' : 'false')
+      // Set published value as string
+      formDataObj.set('published', formData.published ? 'true' : 'false')
 
-    if (project) {
-      formDataObj.append('id', project.id)
-    }
+      if (project) {
+        formDataObj.append('id', project.id)
+      }
 
-    const result = project
-      ? await updateProject(formDataObj)
-      : await createProject(formDataObj)
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout after 30 seconds')), 30000)
+      )
 
-    if (result.error) {
-      setError(result.error)
+      const result = await Promise.race([
+        project ? updateProject(formDataObj) : createProject(formDataObj),
+        timeoutPromise
+      ]) as { error?: string; success?: boolean }
+
+      if (result.error) {
+        setError(result.error)
+        setLoading(false)
+      } else {
+        router.refresh()
+        onClose()
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error)
+      setError(error instanceof Error ? error.message : 'An error occurred. Please try again.')
       setLoading(false)
-    } else {
-      router.refresh()
-      onClose()
     }
   }
 
@@ -203,16 +215,18 @@ export default function ProjectModal({ project, categories = [], onClose }: Proj
                 htmlFor="thumbnail"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
               >
-                Thumbnail Image {!project && '*'}
+                Thumbnail Image (Optional)
               </label>
               <input
                 type="file"
                 id="thumbnail"
                 name="thumbnail"
                 accept="image/*"
-                required={!project}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               />
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Note: File uploads on Vercel use placeholder images. For production, use a cloud storage service (S3, Cloudinary, etc.)
+              </p>
             </div>
 
             <div className="flex items-center">
