@@ -7,12 +7,12 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const token = searchParams.get('token')
   
-  // Use a secret token - change this to something secure
-  const SECRET_TOKEN = process.env.INIT_ADMIN_TOKEN || 'change-this-secret-token'
+  // Use a secret token from environment variables
+  const SECRET_TOKEN = process.env.INIT_ADMIN_TOKEN
   
-  if (token !== SECRET_TOKEN) {
+  if (!SECRET_TOKEN || token !== SECRET_TOKEN) {
     return NextResponse.json(
-      { error: 'Unauthorized. Provide ?token=YOUR_SECRET_TOKEN' },
+      { error: 'Unauthorized.' },
       { status: 401 }
     )
   }

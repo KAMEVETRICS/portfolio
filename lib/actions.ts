@@ -6,8 +6,14 @@ import { writeFile } from 'fs/promises'
 import { join } from 'path'
 import { existsSync, mkdirSync } from 'fs'
 import { uploadImage } from './cloudinary'
+import { getServerSession } from 'next-auth'
+import { authOptions } from './auth'
+import crypto from 'crypto'
 
 export async function createProject(formData: FormData) {
+  const session = await getServerSession(authOptions)
+  if (!session) return { error: 'Unauthorized' }
+
   const title = formData.get('title') as string
   const description = formData.get('description') as string
   const projectUrl = formData.get('projectUrl') as string
@@ -16,6 +22,14 @@ export async function createProject(formData: FormData) {
 
   if (!title || !description || !projectUrl) {
     return { error: 'Missing required fields' }
+  }
+
+  if (projectUrl && !/^(https?:\/\/)/i.test(projectUrl)) {
+    return { error: 'Invalid project URL. Must start with http:// or https://' }
+  }
+
+  if (thumbnail && thumbnail.size > 5 * 1024 * 1024) {
+    return { error: 'Thumbnail limit is 5MB' }
   }
 
   let thumbnailUrl = ''
@@ -29,7 +43,7 @@ export async function createProject(formData: FormData) {
       } else {
         // Fallback to local filesystem (for local development)
         const isVercel = process.env.VERCEL === '1'
-        
+
         if (isVercel) {
           // On Vercel without Cloudinary, use placeholder
           thumbnailUrl = 'https://via.placeholder.com/800x450?text=Configure+Cloudinary+for+Image+Uploads&bg=6366f1&color=fff'
@@ -38,13 +52,15 @@ export async function createProject(formData: FormData) {
           // Local development - write to filesystem
           const bytes = await thumbnail.arrayBuffer()
           const buffer = Buffer.from(bytes)
-          
+
           const uploadsDir = join(process.cwd(), 'public', 'uploads')
           if (!existsSync(uploadsDir)) {
             mkdirSync(uploadsDir, { recursive: true })
           }
 
-          const filename = `${Date.now()}-${thumbnail.name.replace(/\s/g, '-')}`
+          // Prevent path traversal by generating a safe filename
+          const ext = thumbnail.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 'png'
+          const filename = `${crypto.randomUUID()}.${ext}`
           const filepath = join(uploadsDir, filename)
 
           await writeFile(filepath, buffer)
@@ -82,6 +98,9 @@ export async function createProject(formData: FormData) {
 }
 
 export async function updateProject(formData: FormData) {
+  const session = await getServerSession(authOptions)
+  if (!session) return { error: 'Unauthorized' }
+
   const id = formData.get('id') as string
   const title = formData.get('title') as string
   const description = formData.get('description') as string
@@ -91,6 +110,14 @@ export async function updateProject(formData: FormData) {
 
   if (!id || !title || !description || !projectUrl) {
     return { error: 'Missing required fields' }
+  }
+
+  if (projectUrl && !/^(https?:\/\/)/i.test(projectUrl)) {
+    return { error: 'Invalid project URL. Must start with http:// or https://' }
+  }
+
+  if (thumbnail && thumbnail.size > 5 * 1024 * 1024) {
+    return { error: 'Thumbnail limit is 5MB' }
   }
 
   const existingProject = await prisma.project.findUnique({
@@ -112,7 +139,7 @@ export async function updateProject(formData: FormData) {
       } else {
         // Fallback to local filesystem (for local development)
         const isVercel = process.env.VERCEL === '1'
-        
+
         if (isVercel) {
           // On Vercel without Cloudinary, keep existing thumbnail
           console.warn('Cloudinary not configured. Keeping existing thumbnail.')
@@ -121,13 +148,15 @@ export async function updateProject(formData: FormData) {
           // Local development - write to filesystem
           const bytes = await thumbnail.arrayBuffer()
           const buffer = Buffer.from(bytes)
-          
+
           const uploadsDir = join(process.cwd(), 'public', 'uploads')
           if (!existsSync(uploadsDir)) {
             mkdirSync(uploadsDir, { recursive: true })
           }
 
-          const filename = `${Date.now()}-${thumbnail.name.replace(/\s/g, '-')}`
+          // Prevent path traversal by generating a safe filename
+          const ext = thumbnail.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 'png'
+          const filename = `${crypto.randomUUID()}.${ext}`
           const filepath = join(uploadsDir, filename)
 
           await writeFile(filepath, buffer)
@@ -165,6 +194,9 @@ export async function updateProject(formData: FormData) {
 }
 
 export async function deleteProject(id: string) {
+  const session = await getServerSession(authOptions)
+  if (!session) return { error: 'Unauthorized' }
+
   try {
     await prisma.project.delete({
       where: { id },
@@ -180,6 +212,9 @@ export async function deleteProject(id: string) {
 }
 
 export async function createCategory(formData: FormData) {
+  const session = await getServerSession(authOptions)
+  if (!session) return { error: 'Unauthorized' }
+
   const name = formData.get('name') as string
   const description = formData.get('description') as string | null
 
@@ -204,6 +239,9 @@ export async function createCategory(formData: FormData) {
 }
 
 export async function updateCategory(formData: FormData) {
+  const session = await getServerSession(authOptions)
+  if (!session) return { error: 'Unauthorized' }
+
   const id = formData.get('id') as string
   const name = formData.get('name') as string
   const description = formData.get('description') as string | null
@@ -230,6 +268,9 @@ export async function updateCategory(formData: FormData) {
 }
 
 export async function deleteCategory(id: string) {
+  const session = await getServerSession(authOptions)
+  if (!session) return { error: 'Unauthorized' }
+
   try {
     await prisma.category.delete({
       where: { id },
